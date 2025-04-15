@@ -1,9 +1,14 @@
 "use server";
-import { signIn } from "@/app/lib/auth";
+import { auth, signIn, signOut } from "@/app/lib/auth";
 
 export async function handleAuth() {
+  const session = await auth();
+
+  if (session) {
+    await signOut();
+  }
+
   await signIn("google", {
-    redirect: true,
     redirectTo: "/dashboard",
   });
 }

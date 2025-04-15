@@ -1,17 +1,33 @@
+import { handleAuth } from "@/app/actions/handle-auth";
 import { auth } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
 
-export default async function Page() {
+export default async function Dashboard() {
+  // Estamos no lado do servidor!!!
   const session = await auth();
 
-  if (!session) return redirect("/login");
+  if (!session) {
+    redirect("/login");
+  }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1>Dashboard Page</h1>
+    <div className="flex flex-col gap-10 items-center justify-center h-screen">
+      <h1 className="text-4xl font-bold">Protected Dashboard</h1>
       <p>
-        {session?.user?.email ? session.user.email : "usuario não esta logado"}
+        {session?.user?.email
+          ? session?.user?.email
+          : "Usuário não esta logado!!!"}
       </p>
-    </main>
+      {session.user?.email && (
+        <form action={handleAuth}>
+          <button
+            type="submit"
+            className="border rounded-md px-2 py-1 cursor-pointer"
+          >
+            Logout
+          </button>
+        </form>
+      )}
+    </div>
   );
 }
