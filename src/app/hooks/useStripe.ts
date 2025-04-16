@@ -52,14 +52,14 @@ export function useStripe() {
 
       const data = await response.json();
 
-      await stripe.redirectToCheckout({ sessionId: data.id });
+      await stripe.redirectToCheckout({ sessionId: data.sessionId });
     } catch (error) {
       console.error(error);
     }
   }
 
   async function handleCreateStripePortal() {
-    const response = await fetch("/api/stripe/create-subscription-checkout", {
+    const response = await fetch("/api/stripe/create-portal", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

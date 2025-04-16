@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import stripe from "@/app/lib/stripe";
 import { auth } from "@/app/lib/auth";
-import { getOrCreateCustomerId } from "@/app/server/stripe/get-customer-id";
+import { getOrCreateCustomerId } from "@/app/server/stripe/get-or-create-customer";
 
 export async function POST(req: NextRequest) {
   const { testeID } = await req.json();
@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
   try {
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price, quantity: 1 }],
-      mode: "payment",
-      payment_method_types: ["card", "boleto"],
+      mode: "subscription",
+      payment_method_types: ["card"],
       success_url: `${req.headers.get("origin")}/success`,
       cancel_url: `${req.headers.get("origin")}/`,
       metadata,
@@ -39,6 +39,8 @@ export async function POST(req: NextRequest) {
     if (!session.url) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
+
+    return NextResponse.json({ sessionId: session.id }, { status: 200 });
   } catch (e) {
     console.error(e);
     return NextResponse.error();

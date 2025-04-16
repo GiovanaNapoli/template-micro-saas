@@ -5,35 +5,36 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
+
   const userId = session?.user?.id;
 
-  if (!session) {
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const userRef = db.collection("users").doc(userId!);
+    const userRef = db.collection("users").doc(userId);
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const customerId = userDoc.data()?.stripeCustomerId;
+    const customerId = userDoc.data()?.stripeCustomerId; // Onde vem?
 
     if (!customerId) {
       return NextResponse.json(
-        { error: "Customer ID not found" },
+        { error: "Customer not found" },
         { status: 404 }
       );
     }
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${req.headers.get("origin")}/dashboard`,
+      return_url: `${req.headers.get("origin")}/`,
     });
 
-    return NextResponse.json({ url: portalSession.url }, { status: 200 });
+    return NextResponse.json({ url: portalSession.url });
   } catch (error) {
     console.error(error);
     return NextResponse.error();
